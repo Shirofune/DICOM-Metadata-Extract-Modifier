@@ -8,29 +8,22 @@
     <artifactId>DICOM-Extract</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <repositories>
+        <repository>
+            <id>DICOM lib</id>
+            <name>DICOM library</name>
+            <url>https://maven.scijava.org/content/repositories/public/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
-        <dependency>
-            <groupId>com.pixelmed</groupId>
-            <artifactId>pixelmed</artifactId>
-            <version>20150512</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/pixelmed.jar</systemPath>
-        </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <!-- https://mvnrepository.com/artifact/org.dcm4che/dcm4che-core -->
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20190722</version>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-core</artifactId>
+            <version>5.31.1</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
-        </dependency>
-
 
     </dependencies>
 

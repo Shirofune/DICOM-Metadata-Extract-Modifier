@@ -1,2 +1,2 @@
-DICOM.class
-DICOM$GenericExtensionFilter.class
+DICOMMetadata.class
+ReadHeaderInfo.class

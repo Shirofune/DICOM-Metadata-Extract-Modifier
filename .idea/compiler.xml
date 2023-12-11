@@ -9,8 +9,5 @@
         <module name="DICOM-Extract" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="DICOM-Extract" target="8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

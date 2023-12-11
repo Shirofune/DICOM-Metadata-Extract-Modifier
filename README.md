@@ -1,42 +1,35 @@
-# DICOM-Metadata-Extract
->(Code Challenge under [caMicroscope](https://github.com/camicroscope))
+# DICOM-Metadata-Extract-Modifier
 
-> A Simple JAVA project to extract metadata out of the DICOM image files using pixelmed.jar. 
+> Proyecto Java simple que utiliza dcm4che para leer y editar los metadatos de imágenes DICOM 
 
-> DICOM® (Digital Imaging and Communications in Medicine) is the international standard to transmit, store, retrieve, print, process, and display medical imaging information. Inside every DICOM file, there is not only an image but some metadata too containing various kinds of information about that particular image, test, patient ID, Body part examined etc. 
+Los metadatos de las imágenes DICOM se componen de 3 campos:
 
+> Tag Address: Valor hexadecimal, identificador
+> 
+> VR: Identificador del valor, o del tipo del mismo
+> 
+> Value: Valor del metadato.
 
-This Application automatically locates the DICOM image files from the project directory.
-It then extracts the necessary metadata out of them and stores it in a text file **DICOM_MetaData.txt** in the project directory itself :innocent:
+La librería dcm4che proporciona una tabla para acceder a metadatos específicos, mediante la conversión de Tag Address a un número decimal. (Es un ENUM de números enteros)
 
-Used libraries: [PixelMed JAVA DICOM Toolkit](http://www.pixelmed.com/dicomtoolkit.html)
+El proyecto cuenta de una clase Launcher en la que se implementan varios métodos como ejemplo para implementar distintas funcionalidades:
 
+> readHeader
 
-**Ensure the below prerequisites:**
-* All Dicom images must be placed in the current project directory.
-* Maven is installed in your system.
-(If not, run the following command)
-`sudo apt install maven`
+Método que lee e imprime todos los metadatos disponibles de una imágen DICOM.
 
+> readMetadata
 
-**Steps to run the application:**
+Método similar al anterior, pero además imprime el valor de dichos metadatos.
 
-* Step-1: (Clone the project)
+> modifyMetadata
 
-`git clone https://github.com/CapTen101/DICOM-Metadata-Extract.git`
+Método que recibe como input una imágen DICOM y un array de atributos a modificar.
 
-* Step-1: (In the project directory, build the project)
+Para modificar un atributo, hace falta su Tag Address y su VR.
 
-`mvn compile`
+El método modificará los atributos indicados y los guardará en un duplicado de la imágen original, también indicado por parámetros.
 
-* Step-2: (Install all the necessary dependencies)
+> readTagFromDICOMImage
 
-`mvn install`
-
-* Step-3: (Run the project)
-
-`java -cp target/DICOM-Extract.jar DICOM`
-
-You can observe the required output.
-
-Thanks!
+Método que lee el valor de una metadato específico de una imágen DICOM
