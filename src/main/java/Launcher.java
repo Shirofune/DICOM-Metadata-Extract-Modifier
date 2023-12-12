@@ -11,24 +11,51 @@ import java.util.ArrayList;
 public class Launcher {
 
     public static void main(String[] args) {
-        String inputDicomFilePath = "C:\\Salud\\eCieMaps\\workspaceIntelliji\\DICOM-Metadata-Extract\\EJEMPLO.dcm";
-        String outputDicomFilePath = "C:\\Salud\\eCieMaps\\workspaceIntelliji\\DICOM-Metadata-Extract" +
-                "\\EJEMPLO_MODIFICADO.dcm";
+
+        String workingDir = System.getProperty("user.dir");
+        String inputDicomFilePath = workingDir + "/EJEMPLO.dcm";
+        String outputDicomFilePath = workingDir + "/EJEMPLO_MODIFICADO.dcm";
+
+
         try {
 
+            // Lee todos los metadatos de una imágen DICOM
+            ArrayList<DICOMMetadata> allMetadata = readMetadata(inputDicomFilePath);
+            for (DICOMMetadata metadata : allMetadata) {
+                System.out.println("Tag Address: " + metadata.getTagAddress() + " VR: " + metadata.getVR() + " Value" + ":" + " " + metadata.getValue());
+            }
 
+            System.out.println("----------------------------------------");
+
+            // Lee un atributo específico de una imágen DICOM
             DICOMMetadata dicomMetadata = readTagFromDICOMImage(inputDicomFilePath, Tag.PatientID);
+            System.out.println("Tag: " + dicomMetadata.getTagAddress() + " Value: " + dicomMetadata.getValue());
 
-            System.out.println(convertTagAddressToDecimal(dicomMetadata.getTagAddress()));
-//            dicomMetadata.setValue("Nombre de Paciente modificado!");
-//
-//            ArrayList<DICOMMetadata> attributeList = new ArrayList<>();
-//            attributeList.add(dicomMetadata);
-//
-//            modifyMetadata(inputDicomFilePath, outputDicomFilePath, attributeList);
-//
-//            System.out.println(readTagFromDICOMImage(inputDicomFilePath, Tag.PatientName).getValue());
-//            System.out.println(readTagFromDICOMImage(outputDicomFilePath, Tag.PatientName).getValue());
+
+            System.out.println("----------------------------------------");
+
+            // Modifica atributos de una imágen DICOM
+
+            // El VR y el Tag Name se recuperan con el read, aquí solo cambiamos el valor.
+            dicomMetadata = readTagFromDICOMImage(inputDicomFilePath, Tag.PatientID);
+            dicomMetadata.setValue("ID DE PACIENTE MODIFICADO");
+
+            // Es un array, si hace falta modificar varios atributos, se añaden más objetos con distintos atributos
+            ArrayList<DICOMMetadata> attributeList = new ArrayList<>();
+            attributeList.add(dicomMetadata);
+
+            dicomMetadata = readTagFromDICOMImage(inputDicomFilePath, Tag.PatientName);
+            dicomMetadata.setValue("NOMBRE DE PACIENTE MODIFICADO");
+            attributeList.add(dicomMetadata);
+
+            modifyMetadata(inputDicomFilePath, outputDicomFilePath, attributeList);
+
+            System.out.println("Original");
+            System.out.println("Patient ID " + readTagFromDICOMImage(inputDicomFilePath, Tag.PatientID).getValue());
+            System.out.println("Patient Name " + readTagFromDICOMImage(inputDicomFilePath, Tag.PatientName).getValue());
+            System.out.println("Modificado");
+            System.out.println("Patient ID " + readTagFromDICOMImage(outputDicomFilePath, Tag.PatientID).getValue());
+            System.out.println("Patient Name " + readTagFromDICOMImage(outputDicomFilePath, Tag.PatientName).getValue());
 
 
         } catch (IOException e) {
@@ -36,50 +63,44 @@ public class Launcher {
         }
     }
 
-    private static void readHeader(String inputPath) throws IOException {
-        File file = new File(inputPath);
-        DicomInputStream dis = new DicomInputStream(file);
-        Attributes attributes = dis.readDataset();
-        int[] tags = attributes.tags();
-        System.out.println("Total tags found in the given dicom file: " + tags.length);
-        for (int tag : tags) {
-            String tagAddress = TagUtils.toString(tag);
-            String vr = attributes.getVR(tag).toString();
-            System.out.println("Tag Address: " + tagAddress + " VR: " + vr);
-        }
-        dis.close();
-    }
 
     /**
-     * Lee todos los valores de metadata de una imagen DICOM
+     * Lee y devuelve todos los metadatos de una imágen DICOM
      *
-     * @param dicomFilePath
-     * @throws IOException
+     * @param dicomFilePath Path a la imágen DICOM
+     * @return Un Array con todos los datos de la imágen. Array vacío si no hay datos.
+     * @throws IOException Si la fila no se encuentra
      */
-    private static void readMetadata(String dicomFilePath) throws IOException {
+    private static ArrayList<DICOMMetadata> readMetadata(String dicomFilePath) throws IOException {
         File file = new File(dicomFilePath);
         DicomInputStream dis = new DicomInputStream(file);
         Attributes attributes = dis.readDataset();
         int[] tags = attributes.tags();
-        System.out.println("Total tags found in dicom file: " + tags.length);
+
+        ArrayList<DICOMMetadata> allMetadata = new ArrayList<>();
+
         for (int tag : tags) {
-            String tagAddress = TagUtils.toString(tag);
-            String vr = attributes.getVR(tag).toString();
-            String tagValue = attributes.getString(tag);
-            System.out.println("Tag Address: " + tagAddress + " VR: " + vr + " Value: " + tagValue);
+            DICOMMetadata metadata = new DICOMMetadata();
+            metadata.setTagAddress(TagUtils.toString(tag));
+            metadata.setVr(attributes.getVR(tag));
+            metadata.setValue(attributes.getString(tag));
+            metadata.setTagName(convertTagAddressToDecimal(metadata.getTagAddress()));
+            allMetadata.add(metadata);
         }
+
         dis.close();
+        return allMetadata;
     }
 
 
     /**
      * Modifica los atributos de una imágen DICOM original, y almacena la imágen modificada en otro sitio
      *
-     * @param inputDicomPath
-     * @param outputDicomPath
+     * @param inputDicomPath     Path a la imágen original
+     * @param outputDicomPath    Path para guardar la imágen modificada
      * @param attributesToModify atributos a modificar de la ímagen DICOM, contiene su identificador, su valor VR y
      *                           el valor a modificar
-     * @throws IOException
+     * @throws IOException Si no es capaz de encontrar la fila a abrir
      */
     private static void modifyMetadata(String inputDicomPath, String outputDicomPath,
                                        ArrayList<DICOMMetadata> attributesToModify) throws IOException {
@@ -98,10 +119,13 @@ public class Launcher {
     }
 
     /**
-     * Lee los valores de una etiqueta en concreto de una imágen DICOM
+     * Lee los valores asociados a una etiqueta específica de una imágen DICOM
      *
-     * @param imagePath Path a la imágen
-     * @throws IOException
+     * @param imagePath Path a la imágen DICOM que leer
+     * @param tagName   Valor en decimal del TagAddress que se quiere leer (Se puede usar Tag. para obtener una lista
+     *                  con los valores)
+     * @return Una entidad con los metadatos, si existe. Si no existen, devuelve null.
+     * @throws IOException Si no es capaz de abrir la imágen DICOM
      */
     private static DICOMMetadata readTagFromDICOMImage(String imagePath, int tagName) throws IOException {
         File file = new File(imagePath);
@@ -122,7 +146,7 @@ public class Launcher {
     /**
      * Convierte una tag address a su equivalente en decimal
      *
-     * @param tagAddress
+     * @param tagAddress Valor hexadecimal del Tag Address
      * @return el equivalente en decimal
      */
     public static int convertTagAddressToDecimal(String tagAddress) {

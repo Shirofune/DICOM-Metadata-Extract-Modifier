@@ -12,15 +12,15 @@ Los metadatos de las imágenes DICOM se componen de 3 campos:
 
 La librería dcm4che proporciona una tabla para acceder a metadatos específicos, mediante la conversión de Tag Address a un número decimal. (Es un ENUM de números enteros)
 
+Se puede obtener una lista de todos los valores disponibles desde el siguiente enlace:
+
+https://www.dicomlibrary.com/dicom/dicom-tags/
+
 El proyecto cuenta de una clase Launcher en la que se implementan varios métodos como ejemplo para implementar distintas funcionalidades:
-
-> readHeader
-
-Método que lee e imprime todos los metadatos disponibles de una imágen DICOM.
 
 > readMetadata
 
-Método similar al anterior, pero además imprime el valor de dichos metadatos.
+Lee y devuelve un Array con todos los metadatos de una imágen DICOM.
 
 > modifyMetadata
 
